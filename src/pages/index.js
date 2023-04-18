@@ -2,32 +2,20 @@ import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
-import { Box } from "@chakra-ui/react";
-import "@rainbow-me/rainbowkit/styles.css";
-import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { configureChains, createClient, WagmiConfig } from "wagmi";
-import { mainnet, polygon, optimism, arbitrum } from "wagmi/chains";
-import { alchemyProvider } from "wagmi/providers/alchemy";
-import { publicProvider } from "wagmi/providers/public";
+import { Box, Button, Center } from "@chakra-ui/react";
 const inter = Inter({ subsets: ["latin"] });
-
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useState } from "react";
+import { Contract, providers, utils } from "ethers";
+import { useProvider, useSigner, useContract } from "wagmi";
+import { ABI, contractAddress } from "@/constants/constants";
 export default function Home() {
-  const { chains, provider } = configureChains(
-    [mainnet, polygon, optimism, arbitrum],
-    [alchemyProvider({ apiKey: process.env.ALCHEMY_ID }), publicProvider()]
-  );
-
-  const { connectors } = getDefaultWallets({
-    appName: "Mint NFT",
-    projectId: "2455679236dbec241fec394feb4fe62d",
-    chains,
-  });
-
-  const wagmiClient = createClient({
-    autoConnect: true,
-    connectors,
-    provider,
-  });
+  const { data: signer, isError, isLoading } = useSigner();
+  const mintNft = async () => {
+    const nftContract = new Contract(contractAddress, ABI, signer);
+    const tx = await nftContract.mint(1);
+    await tx.wait();
+  };
   return (
     <>
       <Head>
@@ -36,9 +24,43 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>
-        <Box color={"red.700"}>assd</Box>
-      </main>
+      <Box
+        bgGradient={
+          "linear-gradient( 113deg,  rgba(251,250,205,1) 24.4%, rgba(247,163,205,1) 53.7%, rgba(141,66,243,1) 99.2% );"
+        }
+        height={"100vh"}
+        fontFamily="Courier New, Courier, monospace"
+      >
+        {/* navigation */}
+        <Box
+          padding={"25px 20px"}
+          display={"flex"}
+          justifyContent={"right"}
+          alignItems={"center"}
+        >
+          <Box
+            display={"flex"}
+            justifyContent={"space-evenly"}
+            alignItems={"center"}
+            width={"50%"}
+          >
+            <Box display={"flex"} fontWeight={"bold"}>
+              About
+            </Box>
+            <ConnectButton />
+          </Box>
+        </Box>
+        {/* main content */}
+        <Center h={"60vh"} display={"flex"} flexDir={"column"}>
+          <Box marginBottom={8} fontWeight={"bold"}>
+            Mint your BAYC NFT now. You can have at max 5 NFTs.
+          </Box>
+
+          <Button width={"15%"} onClick={mintNft}>
+            Mint NFT
+          </Button>
+        </Center>
+      </Box>
     </>
   );
 }
