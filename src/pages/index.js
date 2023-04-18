@@ -11,10 +11,21 @@ import { useProvider, useSigner, useContract } from "wagmi";
 import { ABI, contractAddress } from "@/constants/constants";
 export default function Home() {
   const { data: signer, isError, isLoading } = useSigner();
+  console.log(signer);
   const mintNft = async () => {
     const nftContract = new Contract(contractAddress, ABI, signer);
     const tx = await nftContract.mint(1);
     await tx.wait();
+  };
+
+  const [balance, setBalance] = useState();
+
+  const showBalance = async () => {
+    const nftContract = new Contract(contractAddress, ABI, signer);
+    const tx = await nftContract.balanceOf(signer._address);
+    const abx = BigInt(tx._hex).toString();
+    setBalance(abx);
+    console.log(abx);
   };
   return (
     <>
@@ -51,15 +62,22 @@ export default function Home() {
           </Box>
         </Box>
         {/* main content */}
-        <Center h={"60vh"} display={"flex"} flexDir={"column"}>
+        <Box h={"60vh"} display={"flex"} flexDir={"column"}>
           <Box marginBottom={8} fontWeight={"bold"}>
             Mint your BAYC NFT now. You can have at max 5 NFTs.
           </Box>
-
-          <Button width={"15%"} onClick={mintNft}>
-            Mint NFT
-          </Button>
-        </Center>
+          <Box width={"50%"}>
+            <Button width={"18%"} onClick={mintNft} marginRight={8}>
+              Mint NFT
+            </Button>
+            <Button width={"18%"} onClick={showBalance}>
+              Show Balance
+            </Button>
+          </Box>
+          <Box fontWeight={"bold"}>
+            {balance ? `You have ${balance} BAYC NFTs` : ""}
+          </Box>
+        </Box>
       </Box>
     </>
   );
