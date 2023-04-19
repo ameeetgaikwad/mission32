@@ -41,7 +41,7 @@ export default function Home() {
   const [failMint, setFailMint] = useState(false);
 
   let contractAddress;
-  switch (chain.id) {
+  switch (chain?.id) {
     case 8081:
       contractAddress = sharedeumLibertyContractAddress;
       break;
@@ -57,7 +57,8 @@ export default function Home() {
 
   useEffect(() => {
     setBalance();
-  }, [chain]);
+    setFailMint(false);
+  }, [chain, signer]);
 
   const mintNft = async () => {
     try {
