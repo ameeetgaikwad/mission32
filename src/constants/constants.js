@@ -1,4 +1,9 @@
-export const contractAddress = "0xB362D52282642Fe3936e738b020c56f007fEc1b2";
+export const sharedeumLibertyContractAddress =
+  "0xB362D52282642Fe3936e738b020c56f007fEc1b2";
+export const polygonMumbaiContractAddress =
+  "0x5b17922E3C3A2C911A8fc5C17f9a214022A08B64";
+export const sepoliaContractAddress =
+  "0x5aC39f4Bd62Bb9722b03F41FB07c84dB683F41E2";
 export const ABI = [
   {
     inputs: [

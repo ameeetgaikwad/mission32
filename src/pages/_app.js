@@ -14,6 +14,7 @@ import {
   arbitrum,
   Chain,
   polygonMumbai,
+  sepolia,
 } from "wagmi/chains";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
@@ -48,7 +49,7 @@ const ShardeumLiberty = {
 };
 
 const { chains, provider } = configureChains(
-  [ShardeumLiberty],
+  [ShardeumLiberty, polygonMumbai, sepolia],
   [
     jsonRpcProvider({
       rpc: (chain) => ({

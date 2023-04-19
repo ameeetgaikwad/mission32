@@ -15,30 +15,64 @@ import {
 } from "@chakra-ui/react";
 const inter = Inter({ subsets: ["latin"] });
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Contract, providers, utils } from "ethers";
-import { useProvider, useSigner, useContract } from "wagmi";
-import { ABI, contractAddress } from "@/constants/constants";
+import {
+  useProvider,
+  useSigner,
+  useContract,
+  useAccount,
+  useNetwork,
+} from "wagmi";
+import {
+  ABI,
+  sharedeumLibertyContractAddress,
+  polygonMumbaiContractAddress,
+  sepoliaContractAddress,
+} from "@/constants/constants";
 export default function Home() {
   const { data: signer } = useSigner();
-
+  const { connector: activeConnector, isConnected } = useAccount();
+  const { chain, chains } = useNetwork();
+  console.log("outside signer", signer);
   const [balance, setBalance] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [successMint, setSuccessMint] = useState(false);
   const [failMint, setFailMint] = useState(false);
 
+  let contractAddress;
+  switch (chain.id) {
+    case 8081:
+      contractAddress = sharedeumLibertyContractAddress;
+      break;
+    case 80001:
+      contractAddress = polygonMumbaiContractAddress;
+      break;
+    case 11155111:
+      contractAddress = sepoliaContractAddress;
+      break;
+  }
+
+  useEffect(() => {
+    setBalance();
+  }, [chain]);
+
   const mintNft = async () => {
     try {
-      setFailMint(false);
-      setSuccessMint();
-      setBalance();
-      setIsLoading(true);
-      const nftContract = new Contract(contractAddress, ABI, signer);
-      const tx = await nftContract.mint(1, { value: utils.parseEther("1") });
-      await tx.wait();
-      const receipt = await tx.wait();
-      setIsLoading(false);
-      setSuccessMint(true);
+      if (isConnected) {
+        setFailMint(false);
+        setSuccessMint();
+        setBalance();
+        setIsLoading(true);
+        const nftContract = new Contract(contractAddress, ABI, signer);
+        const tx = await nftContract.mint(1);
+        await tx.wait();
+        const receipt = await tx.wait();
+        setIsLoading(false);
+        setSuccessMint(true);
+      } else {
+        alert("Connect your wallet");
+      }
     } catch (error) {
       console.log(`An error occurred: ${error.message}`);
       setFailMint(true);
@@ -47,16 +81,21 @@ export default function Home() {
   };
 
   const showBalance = async () => {
-    setBalance();
-    setFailMint(false);
-    setSuccessMint();
-    setIsLoading(true);
-    const nftContract = new Contract(contractAddress, ABI, signer);
-    const tx = await nftContract.balanceOf(signer?._address);
+    try {
+      setBalance();
+      setFailMint(false);
+      setSuccessMint();
+      setIsLoading(true);
+      const nftContract = new Contract(contractAddress, ABI, signer);
+      const tx = await nftContract.balanceOf(signer?._address);
 
-    const noOfTokens = BigInt(tx._hex).toString();
-    setBalance(noOfTokens);
-    setIsLoading(false);
+      const noOfTokens = BigInt(tx._hex).toString();
+      setBalance(noOfTokens);
+      setIsLoading(false);
+    } catch (error) {
+      console.log(`An error occurred: ${error.message}`);
+      setIsLoading(false);
+    }
   };
   return (
     <>
@@ -72,6 +111,7 @@ export default function Home() {
         }
         height={"100vh"}
         fontFamily="Courier New, Courier, monospace"
+        textAlign={"center"}
       >
         {/* navigation */}
         <Box
@@ -84,7 +124,7 @@ export default function Home() {
             display={"flex"}
             justifyContent={"space-evenly"}
             alignItems={"center"}
-            width={"30%"}
+            width={"40%"}
           >
             <ConnectButton />
           </Box>
@@ -137,10 +177,10 @@ export default function Home() {
             fontWeight={"bold"}
             marginTop={8}
           >
-            <Box>{balance ? `You have ${balance} BAYC NFTs` : ""}</Box>
+            <Box>{balance ? `You have ${balance} BAYC NFTs.` : ""}</Box>
             <Box>{isLoading ? <Spinner /> : ""}</Box>
             <Box>
-              {successMint ? "You have successfully minted an BAYC NFT" : ""}
+              {successMint ? "You have successfully minted an BAYC NFT!" : ""}
             </Box>
             <Box
               display={"flex"}
