@@ -2,7 +2,17 @@ import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
-import { Box, Button, Center } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Center,
+  Spinner,
+  Text,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+} from "@chakra-ui/react";
 const inter = Inter({ subsets: ["latin"] });
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useState } from "react";
@@ -10,22 +20,43 @@ import { Contract, providers, utils } from "ethers";
 import { useProvider, useSigner, useContract } from "wagmi";
 import { ABI, contractAddress } from "@/constants/constants";
 export default function Home() {
-  const { data: signer, isError, isLoading } = useSigner();
-  console.log(signer);
-  const mintNft = async () => {
-    const nftContract = new Contract(contractAddress, ABI, signer);
-    const tx = await nftContract.mint(1);
-    await tx.wait();
-  };
+  const { data: signer } = useSigner();
 
   const [balance, setBalance] = useState();
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMint, setSuccessMint] = useState(false);
+  const [failMint, setFailMint] = useState(false);
+
+  const mintNft = async () => {
+    try {
+      setFailMint(false);
+      setSuccessMint();
+      setBalance();
+      setIsLoading(true);
+      const nftContract = new Contract(contractAddress, ABI, signer);
+      const tx = await nftContract.mint(1, { value: utils.parseEther("1") });
+      await tx.wait();
+      const receipt = await tx.wait();
+      setIsLoading(false);
+      setSuccessMint(true);
+    } catch (error) {
+      console.log(`An error occurred: ${error.message}`);
+      setFailMint(true);
+      setIsLoading(false);
+    }
+  };
 
   const showBalance = async () => {
+    setBalance();
+    setFailMint(false);
+    setSuccessMint();
+    setIsLoading(true);
     const nftContract = new Contract(contractAddress, ABI, signer);
-    const tx = await nftContract.balanceOf(signer._address);
-    const abx = BigInt(tx._hex).toString();
-    setBalance(abx);
-    console.log(abx);
+    const tx = await nftContract.balanceOf(signer?._address);
+
+    const noOfTokens = BigInt(tx._hex).toString();
+    setBalance(noOfTokens);
+    setIsLoading(false);
   };
   return (
     <>
@@ -37,7 +68,7 @@ export default function Home() {
       </Head>
       <Box
         bgGradient={
-          "linear-gradient( 113deg,  rgba(251,250,205,1) 24.4%, rgba(247,163,205,1) 53.7%, rgba(141,66,243,1) 99.2% );"
+          "linear-gradient( 113deg,  rgba(251,250,205,1) 24.4%, rgba(247,163,205,1) 53.7%, rgba(141,66,243,1) 99.2% )"
         }
         height={"100vh"}
         fontFamily="Courier New, Courier, monospace"
@@ -53,32 +84,92 @@ export default function Home() {
             display={"flex"}
             justifyContent={"space-evenly"}
             alignItems={"center"}
-            width={"50%"}
+            width={"30%"}
           >
-            <Box display={"flex"} fontWeight={"bold"}>
-              About
-            </Box>
             <ConnectButton />
           </Box>
         </Box>
         {/* main content */}
-        <Box h={"60vh"} display={"flex"} flexDir={"column"}>
-          <Box marginBottom={8} fontWeight={"bold"}>
+        <Box
+          display={"flex"}
+          flexDir={"column"}
+          position={"fixed"}
+          top={"50%"}
+          left={"50%"}
+          transform={"translate(-50%,-50%)"}
+        >
+          <Box marginBottom={8} fontWeight={"bold"} fontSize={18}>
             Mint your BAYC NFT now. You can have at max 5 NFTs.
           </Box>
-          <Box width={"50%"}>
-            <Button width={"18%"} onClick={mintNft} marginRight={8}>
+          <Box
+            display={"flex"}
+            justifyContent={"center"}
+            transition={"backgroundImage 5s ease-in-out"}
+          >
+            <Button
+              width={"27%"}
+              marginRight={8}
+              backgroundImage={
+                "linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)"
+              }
+              _hover={{
+                backgroundImage:
+                  "linear-gradient(43deg, #FFCC70 0%, #C850C0 46%, #4158D0 100%)",
+              }}
+              onClick={mintNft}
+            >
               Mint NFT
             </Button>
-            <Button width={"18%"} onClick={showBalance}>
+            <Button
+              width={"27%"}
+              background={"white"}
+              _hover={{
+                background: "#fbcce3",
+              }}
+              onClick={showBalance}
+            >
               Show Balance
             </Button>
           </Box>
-          <Box fontWeight={"bold"}>
-            {balance ? `You have ${balance} BAYC NFTs` : ""}
+          <Box
+            display={"flex"}
+            justifyContent={"center"}
+            fontWeight={"bold"}
+            marginTop={8}
+          >
+            <Box>{balance ? `You have ${balance} BAYC NFTs` : ""}</Box>
+            <Box>{isLoading ? <Spinner /> : ""}</Box>
+            <Box>
+              {successMint ? "You have successfully minted an BAYC NFT" : ""}
+            </Box>
+            <Box
+              display={"flex"}
+              flexDir={"column"}
+              justifyContent={"center"}
+              alignItems={"center"}
+            >
+              <Text>
+                {failMint ? (
+                  <Alert status="error" variant="left-accent">
+                    <AlertIcon />
+                    <AlertTitle fontSize={19}>Minting NFT failed!</AlertTitle>
+                    <AlertDescription>
+                      You might not have enough ETH Or You might have exceeded
+                      the Max NFT Per Address Limit!
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  ""
+                )}
+              </Text>
+            </Box>
           </Box>
         </Box>
       </Box>
     </>
   );
 }
+
+// fbfacd
+// f7a3cd
+// 8d42f3
