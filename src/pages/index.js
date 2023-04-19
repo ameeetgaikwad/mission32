@@ -125,12 +125,15 @@ export default function Home() {
           alignItems={"center"}
         >
           <Tooltip
-            label="Multichain functionality is available for Shardeum Liberty 2.1, Polygon Mumbai, Sepolia. Just select the chain where you want to mint NFT from and the respective chain NFT will be minted"
+            label="Multichain functionality is available for Shardeum Liberty 2.1, Polygon Mumbai, Sepolia. Just select the chain where you want to mint NFT from and the respective chain NFT will be minted."
             aria-label="A tooltip"
             placement="bottom"
           >
             <Box>
-              <Text fontWeight={"extrabold"} fontSize={18}>
+              <Text
+                fontWeight={"extrabold"}
+                fontSize={{ base: "12", sm: "15", md: "18" }}
+              >
                 <CheckCircleIcon /> Multichain Functionality
               </Text>
             </Box>
@@ -159,12 +162,15 @@ export default function Home() {
           </Box>
           <Box
             display={"flex"}
+            flexDirection={{ base: "column", md: "row" }}
             justifyContent={"center"}
+            alignItems={"center"}
             transition={"backgroundImage 5s ease-in-out"}
           >
             <Button
-              width={"27%"}
-              marginRight={8}
+              width={{ base: "65%", sm: "50%", md: "30%" }}
+              marginBottom={{ base: "1rem", md: "0" }}
+              marginRight={{ base: "0", md: "8" }}
               backgroundImage={
                 "linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)"
               }
@@ -177,7 +183,7 @@ export default function Home() {
               Mint NFT
             </Button>
             <Button
-              width={"27%"}
+              width={{ base: "65%", sm: "50%", md: "30%" }}
               background={"white"}
               _hover={{
                 background: "#fbcce3",
