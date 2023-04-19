@@ -51,6 +51,8 @@ export default function Home() {
     case 11155111:
       contractAddress = sepoliaContractAddress;
       break;
+    default:
+      contractAddress = sharedeumLibertyContractAddress;
   }
 
   useEffect(() => {
