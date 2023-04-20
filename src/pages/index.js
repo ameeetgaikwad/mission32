@@ -227,9 +227,8 @@ export default function Home() {
                 >
                   {NFTData.map((data) => {
                     return (
-                      <Box marginRight={4} width={"7rem"}>
+                      <Box key={data} marginRight={4} width={"7rem"}>
                         <Image
-                          key={data}
                           src={`https://gateway.pinata.cloud/ipfs/${data}#x-ipfs-companion-no-redirect`}
                           width={100}
                           height={100}
