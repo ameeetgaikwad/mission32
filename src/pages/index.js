@@ -31,7 +31,6 @@ import {
   polygonMumbaiContractAddress,
   sepoliaContractAddress,
 } from "@/constants/constants";
-import Ipfs from "@/constants/ipfs";
 
 export default function Home() {
   const { data: signer } = useSigner();
