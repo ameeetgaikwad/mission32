@@ -1,6 +1,5 @@
 import Head from "next/head";
 import Image from "next/image";
-import NextLink from "next/link";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import {
@@ -15,17 +14,10 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { CheckCircleIcon } from "@chakra-ui/icons";
-const inter = Inter({ subsets: ["latin"] });
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useState } from "react";
-import { Contract, providers, utils } from "ethers";
-import {
-  useProvider,
-  useSigner,
-  useContract,
-  useAccount,
-  useNetwork,
-} from "wagmi";
+import { Contract } from "ethers";
+import { useSigner, useAccount, useNetwork } from "wagmi";
 import {
   ABI,
   sharedeumLibertyContractAddress,
@@ -116,7 +108,6 @@ export default function Home() {
           .then((response) => response.text())
           .then((data) => {
             datas = data;
-            console.log(data);
           })
           .catch((error) => console.error(error));
 
@@ -124,7 +115,7 @@ export default function Home() {
         const imageUrl = stringData.match(/ipfs:\/\/\w+/)[0];
         NFTDatas.push(imageUrl.slice(7));
       }
-      console.log(NFTDatas[0]);
+
       setNFTData(NFTDatas);
       setBalance(noOfTokens);
       setIsLoading(false);
