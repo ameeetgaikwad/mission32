@@ -231,7 +231,9 @@ export default function Home() {
                         <Image
                           key={data}
                           src={`https://gateway.pinata.cloud/ipfs/${data}#x-ipfs-companion-no-redirect`}
-                          width={"100%"}
+                          width={100}
+                          height={100}
+                          alt="image"
                         />
                       </Box>
                     );
