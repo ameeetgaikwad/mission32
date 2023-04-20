@@ -12,7 +12,6 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  SimpleGrid,
 } from "@chakra-ui/react";
 const inter = Inter({ subsets: ["latin"] });
 import { ConnectButton } from "@rainbow-me/rainbowkit";
@@ -273,10 +272,3 @@ export default function Home() {
     </>
   );
 }
-
-// fbfacd
-// f7a3cd
-// 8d42f3
-
-// https://gateway.pinata.cloud/${ipfs/bafybeifx7yeb55armcsxwwitkymga5xf53dxiarykms3ygqic223w5sk3m}#x-ipfs-companion-no-redirect
-// https://gateway.pinata.cloud/ipfs/QmSg9bPzW9anFYc3wWU5KnvymwkxQTpmqcRSfYj7UmiBa7#x-ipfs-companion-no-redirect
