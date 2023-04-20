@@ -26,9 +26,11 @@ import {
 } from "@/constants/constants";
 
 export default function Home() {
+  // Wagmi hooks
   const { data: signer } = useSigner();
   const { connector: activeConnector, isConnected } = useAccount();
   const { chain, chains } = useNetwork();
+
   const [balance, setBalance] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [successMint, setSuccessMint] = useState(false);
