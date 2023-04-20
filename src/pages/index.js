@@ -1,18 +1,20 @@
 import Head from "next/head";
 import Image from "next/image";
+import NextLink from "next/link";
 import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import {
   Box,
   Button,
-  Center,
   Spinner,
   Text,
   Alert,
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  Tooltip,
 } from "@chakra-ui/react";
+import { CheckCircleIcon } from "@chakra-ui/icons";
 const inter = Inter({ subsets: ["latin"] });
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useState } from "react";
@@ -35,7 +37,6 @@ export default function Home() {
   const { data: signer } = useSigner();
   const { connector: activeConnector, isConnected } = useAccount();
   const { chain, chains } = useNetwork();
-
   const [balance, setBalance] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [successMint, setSuccessMint] = useState(false);
@@ -153,16 +154,31 @@ export default function Home() {
         <Box
           padding={"25px 20px"}
           display={"flex"}
-          justifyContent={"right"}
+          justifyContent={"space-between"}
           alignItems={"center"}
         >
+          <Tooltip
+            label="Multichain functionality is available for Shardeum Liberty 2.1, Polygon Mumbai, Sepolia. Just select the chain where you want to mint NFT from and the respective chain NFT will be minted."
+            aria-label="A tooltip"
+            placement="bottom"
+          >
+            <Box>
+              <Text
+                fontWeight={"extrabold"}
+                fontSize={{ base: "12", sm: "15", md: "18" }}
+              >
+                <CheckCircleIcon /> Multichain Functionality
+              </Text>
+            </Box>
+          </Tooltip>
           <Box
             display={"flex"}
             justifyContent={"space-evenly"}
             alignItems={"center"}
-            width={"40%"}
+            position={"relative"}
+            right={"35"}
           >
-            <ConnectButton />
+            <ConnectButton label="Connect Wallet" accountStatus="avatar" />
           </Box>
         </Box>
         {/* main content */}
@@ -175,16 +191,19 @@ export default function Home() {
           transform={"translate(-50%,-50%)"}
         >
           <Box marginBottom={8} fontWeight={"bold"} fontSize={18}>
-            Mint your BAYC NFT now. You can have at max 5 NFTs.
+            Mint your BAYC NFT now. You can have at max 5 NFTs.{" "}
           </Box>
           <Box
             display={"flex"}
+            flexDirection={{ base: "column", md: "row" }}
             justifyContent={"center"}
+            alignItems={"center"}
             transition={"backgroundImage 5s ease-in-out"}
           >
             <Button
-              width={"27%"}
-              marginRight={8}
+              width={{ base: "65%", sm: "50%", md: "30%" }}
+              marginBottom={{ base: "1rem", md: "0" }}
+              marginRight={{ base: "0", md: "8" }}
               backgroundImage={
                 "linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)"
               }
@@ -197,7 +216,7 @@ export default function Home() {
               Mint NFT
             </Button>
             <Button
-              width={"27%"}
+              width={{ base: "65%", sm: "50%", md: "30%" }}
               background={"white"}
               _hover={{
                 background: "#fbcce3",
@@ -212,6 +231,7 @@ export default function Home() {
             justifyContent={"center"}
             fontWeight={"bold"}
             marginTop={8}
+            flexDir={"column"}
           >
             <Box display={"flex"} flexDir={"column"}>
               <Box>{balance ? `You have ${balance} BAYC NFTs.` : ""}</Box>
