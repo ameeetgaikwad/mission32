@@ -57,6 +57,7 @@ export default function Home() {
     setFailMint(false);
   }, [chain, signer]);
 
+  // Function to mint NFT
   const mintNft = async () => {
     try {
       if (isConnected) {
@@ -80,6 +81,7 @@ export default function Home() {
     }
   };
 
+  // Function to show the NFT balance and the NFT images
   const showBalance = async () => {
     try {
       setBalance();
