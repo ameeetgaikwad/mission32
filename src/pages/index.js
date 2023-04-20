@@ -32,6 +32,7 @@ import {
   polygonMumbaiContractAddress,
   sepoliaContractAddress,
 } from "@/constants/constants";
+
 export default function Home() {
   const { data: signer } = useSigner();
   const { connector: activeConnector, isConnected } = useAccount();
@@ -40,6 +41,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [successMint, setSuccessMint] = useState(false);
   const [failMint, setFailMint] = useState(false);
+  const [NFTData, setNFTData] = useState([]);
 
   let contractAddress;
   switch (chain?.id) {
@@ -93,6 +95,37 @@ export default function Home() {
       const nftContract = new Contract(contractAddress, ABI, signer);
       const tx = await nftContract.balanceOf(signer?._address);
       const noOfTokens = BigInt(tx._hex).toString();
+
+      let tokenIDArray = [];
+      for (let i = 0; i < noOfTokens; i++) {
+        const tokenID = await nftContract.tokenOfOwnerByIndex(
+          signer?._address,
+          i
+        );
+
+        tokenIDArray.push(BigInt(tokenID._hex).toString());
+      }
+
+      let datas;
+      let NFTDatas = [];
+      let stringData;
+      for (let j = 0; j < noOfTokens; j++) {
+        const response = await fetch(
+          `https://ipfs.io/ipfs/QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/${tokenIDArray[j]}`
+        )
+          .then((response) => response.text())
+          .then((data) => {
+            datas = data;
+            console.log(data);
+          })
+          .catch((error) => console.error(error));
+
+        stringData = JSON.stringify(datas);
+        const imageUrl = stringData.match(/ipfs:\/\/\w+/)[0];
+        NFTDatas.push(imageUrl.slice(7));
+      }
+      console.log(NFTDatas[0]);
+      setNFTData(NFTDatas);
       setBalance(noOfTokens);
       setIsLoading(false);
     } catch (error) {
@@ -200,7 +233,34 @@ export default function Home() {
             marginTop={8}
             flexDir={"column"}
           >
-            <Box>{balance ? `You have ${balance} BAYC NFTs.` : ""}</Box>
+            <Box display={"flex"} flexDir={"column"}>
+              <Box>{balance ? `You have ${balance} BAYC NFTs.` : ""}</Box>
+              {balance ? (
+                <Box
+                  display={"flex"}
+                  flexDir={{ base: "column", sm: "row" }}
+                  position={"absolute"}
+                  top={"150%"}
+                  left={"50%"}
+                  transform={"translate(-50%,-50%)"}
+                >
+                  {NFTData.map((data) => {
+                    return (
+                      <Box key={data} marginRight={4} width={"7rem"}>
+                        <Image
+                          src={`https://gateway.pinata.cloud/ipfs/${data}#x-ipfs-companion-no-redirect`}
+                          width={100}
+                          height={100}
+                          alt="image"
+                        />
+                      </Box>
+                    );
+                  })}
+                </Box>
+              ) : (
+                ""
+              )}
+            </Box>
             <Box>{isLoading ? <Spinner /> : ""}</Box>
             <Box>
               {successMint ? "You have successfully minted an BAYC NFT!" : ""}
