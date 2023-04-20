@@ -12,6 +12,7 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
+  SimpleGrid,
 } from "@chakra-ui/react";
 const inter = Inter({ subsets: ["latin"] });
 import { ConnectButton } from "@rainbow-me/rainbowkit";
@@ -30,15 +31,18 @@ import {
   polygonMumbaiContractAddress,
   sepoliaContractAddress,
 } from "@/constants/constants";
+import Ipfs from "@/constants/ipfs";
+
 export default function Home() {
   const { data: signer } = useSigner();
   const { connector: activeConnector, isConnected } = useAccount();
   const { chain, chains } = useNetwork();
-  console.log("outside signer", signer);
+
   const [balance, setBalance] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [successMint, setSuccessMint] = useState(false);
   const [failMint, setFailMint] = useState(false);
+  const [NFTData, setNFTData] = useState([]);
 
   let contractAddress;
   switch (chain?.id) {
@@ -91,8 +95,38 @@ export default function Home() {
       setIsLoading(true);
       const nftContract = new Contract(contractAddress, ABI, signer);
       const tx = await nftContract.balanceOf(signer?._address);
-
       const noOfTokens = BigInt(tx._hex).toString();
+
+      let tokenIDArray = [];
+      for (let i = 0; i < noOfTokens; i++) {
+        const tokenID = await nftContract.tokenOfOwnerByIndex(
+          signer?._address,
+          i
+        );
+
+        tokenIDArray.push(BigInt(tokenID._hex).toString());
+      }
+
+      let datas;
+      let NFTDatas = [];
+      let stringData;
+      for (let j = 0; j < noOfTokens; j++) {
+        const response = await fetch(
+          `https://ipfs.io/ipfs/QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/${tokenIDArray[j]}`
+        )
+          .then((response) => response.text())
+          .then((data) => {
+            datas = data;
+            console.log(data);
+          })
+          .catch((error) => console.error(error));
+
+        stringData = JSON.stringify(datas);
+        const imageUrl = stringData.match(/ipfs:\/\/\w+/)[0];
+        NFTDatas.push(imageUrl.slice(7));
+      }
+      console.log(NFTDatas[0]);
+      setNFTData(NFTDatas);
       setBalance(noOfTokens);
       setIsLoading(false);
     } catch (error) {
@@ -100,6 +134,7 @@ export default function Home() {
       setIsLoading(false);
     }
   };
+
   return (
     <>
       <Head>
@@ -180,7 +215,33 @@ export default function Home() {
             fontWeight={"bold"}
             marginTop={8}
           >
-            <Box>{balance ? `You have ${balance} BAYC NFTs.` : ""}</Box>
+            <Box display={"flex"} flexDir={"column"}>
+              <Box>{balance ? `You have ${balance} BAYC NFTs.` : ""}</Box>
+              {balance ? (
+                <Box
+                  display={"flex"}
+                  flexDir={{ base: "column", sm: "row" }}
+                  position={"absolute"}
+                  top={"150%"}
+                  left={"50%"}
+                  transform={"translate(-50%,-50%)"}
+                >
+                  {NFTData.map((data) => {
+                    return (
+                      <Box marginRight={4} width={"7rem"}>
+                        <img
+                          key={data}
+                          src={`https://gateway.pinata.cloud/ipfs/${data}#x-ipfs-companion-no-redirect`}
+                          width={"100%"}
+                        />
+                      </Box>
+                    );
+                  })}
+                </Box>
+              ) : (
+                ""
+              )}
+            </Box>
             <Box>{isLoading ? <Spinner /> : ""}</Box>
             <Box>
               {successMint ? "You have successfully minted an BAYC NFT!" : ""}
@@ -216,3 +277,6 @@ export default function Home() {
 // fbfacd
 // f7a3cd
 // 8d42f3
+
+// https://gateway.pinata.cloud/${ipfs/bafybeifx7yeb55armcsxwwitkymga5xf53dxiarykms3ygqic223w5sk3m}#x-ipfs-companion-no-redirect
+// https://gateway.pinata.cloud/ipfs/QmSg9bPzW9anFYc3wWU5KnvymwkxQTpmqcRSfYj7UmiBa7#x-ipfs-companion-no-redirect
