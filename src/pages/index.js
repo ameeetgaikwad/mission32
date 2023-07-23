@@ -152,20 +152,7 @@ export default function Home() {
           justifyContent={"space-between"}
           alignItems={"center"}
         >
-          <Tooltip
-            label="Multichain functionality is available for Shardeum Liberty 2.1, Polygon Mumbai, Sepolia. Just select the chain where you want to mint NFT from and the respective chain NFT will be minted."
-            aria-label="A tooltip"
-            placement="bottom"
-          >
-            <Box>
-              <Text
-                fontWeight={"extrabold"}
-                fontSize={{ base: "12", sm: "15", md: "18" }}
-              >
-                <CheckCircleIcon /> Multichain Functionality
-              </Text>
-            </Box>
-          </Tooltip>
+          <Box></Box>
           <Box
             display={"flex"}
             justifyContent={"space-evenly"}
@@ -173,7 +160,11 @@ export default function Home() {
             position={"relative"}
             right={"35"}
           >
-            <ConnectButton label="Connect Wallet" accountStatus="avatar" />
+            <ConnectButton
+              label="Connect Wallet"
+              accountStatus="full"
+              showBalance={true}
+            />
           </Box>
         </Box>
         {/* main content */}

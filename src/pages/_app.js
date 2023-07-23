@@ -20,40 +20,40 @@ import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
 const ShardeumLiberty = {
   id: 8081,
-  name: "Shardeum Liberty 2.1",
-  network: "Shardeum Liberty 2.1",
+  name: "Shardeum Sphinx Dapp 1.X",
+  network: "Shardeum Sphinx Dapp 1.X",
   iconUrl:
     "https://img.api.cryptorank.io/coins/150x150.shardeum1665056595732.png",
   iconBackground: "#fff",
   nativeCurrency: {
     decimals: 18,
-    name: "Shardeum Liberty 2.1",
+    name: "Shardeum Sphinx Dapp 1.X",
     symbol: "SHM",
   },
   rpcUrls: {
     default: {
-      http: ["https://liberty20.shardeum.org/"],
+      http: ["https://dapps.shardeum.org/"],
     },
   },
   blockExplorers: {
     default: {
-      name: "ShardeumLiberty",
-      url: "https://explorer-liberty20.shardeum.org/",
+      name: "Shardeum Sphinx Dapp 1.X",
+      url: "https://explorer-dapps.shardeum.org/",
     },
     etherscan: {
-      name: "ShardeumLiberty",
-      url: "https://explorer-liberty20.shardeum.org/",
+      name: "Shardeum Sphinx Dapp 1.X",
+      url: "https://explorer-dapps.shardeum.org/",
     },
   },
   testnet: true,
 };
 
 const { chains, provider } = configureChains(
-  [ShardeumLiberty, polygonMumbai, sepolia],
+  [ShardeumLiberty],
   [
     jsonRpcProvider({
       rpc: (chain) => ({
-        http: `https://liberty20.shardeum.org/`,
+        http: `https://explorer-dapps.shardeum.org/`,
       }),
     }),
   ]
