@@ -1,7 +1,6 @@
 import Head from "next/head";
 import Image from "next/image";
-import { Inter } from "next/font/google";
-import styles from "@/styles/Home.module.css";
+
 import {
   Box,
   Button,
@@ -11,19 +10,21 @@ import {
   AlertIcon,
   AlertTitle,
   AlertDescription,
-  Tooltip,
+  Input,
 } from "@chakra-ui/react";
-import { CheckCircleIcon } from "@chakra-ui/icons";
+
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useState } from "react";
 import { Contract } from "ethers";
-import { useSigner, useAccount, useNetwork } from "wagmi";
 import {
-  ABI,
-  sharedeumLibertyContractAddress,
-  polygonMumbaiContractAddress,
-  sepoliaContractAddress,
-} from "@/constants/constants";
+  useSigner,
+  useAccount,
+  useNetwork,
+  usePrepareContractWrite,
+  useContractWrite,
+} from "wagmi";
+import { ABI, ContractAddress } from "@/constants/constants";
+import { parseEther } from "ethers/lib/utils.js";
 
 export default function Home() {
   // Wagmi hooks
@@ -35,96 +36,83 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [successMint, setSuccessMint] = useState(false);
   const [failMint, setFailMint] = useState(false);
-  const [NFTData, setNFTData] = useState([]);
 
-  let contractAddress;
-  switch (chain?.id) {
-    case 8081:
-      contractAddress = sharedeumLibertyContractAddress;
-      break;
-    case 80001:
-      contractAddress = polygonMumbaiContractAddress;
-      break;
-    case 11155111:
-      contractAddress = sepoliaContractAddress;
-      break;
-    default:
-      contractAddress = sharedeumLibertyContractAddress;
-  }
-
+  const [tokenId, setTokenId] = useState();
+  const [startPrice, setStartPrice] = useState();
+  const [endPrice, setEndPrice] = useState();
+  const [duration, setDuration] = useState();
+  const [bidValue, setBidValue] = useState();
+  const [bidTokenId, setBidTokenId] = useState();
   useEffect(() => {
-    setBalance();
     setFailMint(false);
+    console.log(signer?._address);
   }, [chain, signer]);
 
   // Function to mint NFT
   const mintNft = async () => {
     try {
       if (isConnected) {
-        setFailMint(false);
-        setSuccessMint();
-        setBalance();
         setIsLoading(true);
-        const nftContract = new Contract(contractAddress, ABI, signer);
-        const tx = await nftContract.mint(1);
+        const nftContract = new Contract(ContractAddress, ABI, signer);
+        console.log(signer?._address);
+        const tx = await nftContract.mint(
+          "0x93104E260cb74E94038F4325098d31EE426C6F85"
+        );
         await tx.wait();
         const receipt = await tx.wait();
         setIsLoading(false);
-        setSuccessMint(true);
       } else {
         alert("Connect your wallet");
       }
     } catch (error) {
       console.log(`An error occurred: ${error.message}`);
-      setFailMint(true);
+
       setIsLoading(false);
     }
   };
 
-  // Function to show the NFT balance and the NFT images
-  const showBalance = async () => {
+  const startAuction = async () => {
     try {
-      setBalance();
-      setFailMint(false);
-      setSuccessMint();
-      setIsLoading(true);
-      const nftContract = new Contract(contractAddress, ABI, signer);
-      const tx = await nftContract.balanceOf(signer?._address);
-      const noOfTokens = BigInt(tx._hex).toString();
-
-      let tokenIDArray = [];
-      for (let i = 0; i < noOfTokens; i++) {
-        const tokenID = await nftContract.tokenOfOwnerByIndex(
-          signer?._address,
-          i
+      if (isConnected) {
+        setIsLoading(true);
+        const nftContract = new Contract(ContractAddress, ABI, signer);
+        const tx = await nftContract.startAuction(
+          tokenId,
+          startPrice,
+          endPrice,
+          duration
         );
-
-        tokenIDArray.push(BigInt(tokenID._hex).toString());
+        await tx.wait();
+        const receipt = await tx.wait();
+        setIsLoading(false);
+      } else {
+        alert("Connect your wallet");
       }
-
-      let datas;
-      let NFTDatas = [];
-      let stringData;
-      for (let j = 0; j < noOfTokens; j++) {
-        const response = await fetch(
-          `https://ipfs.io/ipfs/QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/${tokenIDArray[j]}`
-        )
-          .then((response) => response.text())
-          .then((data) => {
-            datas = data;
-          })
-          .catch((error) => console.error(error));
-
-        stringData = JSON.stringify(datas);
-        const imageUrl = stringData.match(/ipfs:\/\/\w+/)[0];
-        NFTDatas.push(imageUrl.slice(7));
-      }
-
-      setNFTData(NFTDatas);
-      setBalance(noOfTokens);
-      setIsLoading(false);
     } catch (error) {
       console.log(`An error occurred: ${error.message}`);
+
+      setIsLoading(false);
+    }
+  };
+
+  const bidAuction = async () => {
+    try {
+      if (isConnected) {
+        setIsLoading(true);
+        const nftContract = new Contract(ContractAddress, ABI, signer);
+        const tx = await nftContract.bidOnAuction(bidTokenId, {
+          value: parseEther(bidValue),
+        });
+
+        await tx.wait();
+        const receipt = await tx.wait();
+        setIsLoading(false);
+      } else {
+        alert("Connect your wallet");
+      }
+    } catch (error) {
+      console.log(`An error occurred: ${error.message}`);
+
       setIsLoading(false);
     }
   };
@@ -176,19 +164,16 @@ export default function Home() {
           left={"50%"}
           transform={"translate(-50%,-50%)"}
         >
-          <Box marginBottom={8} fontWeight={"bold"} fontSize={18}>
-            Mint your BAYC NFT now. You can have at max 5 NFTs.{" "}
-          </Box>
           <Box
             display={"flex"}
-            flexDirection={{ base: "column", md: "row" }}
+            flexDirection={{ base: "column", md: "column" }}
             justifyContent={"center"}
             alignItems={"center"}
             transition={"backgroundImage 5s ease-in-out"}
           >
             <Button
-              width={{ base: "65%", sm: "50%", md: "30%" }}
-              marginBottom={{ base: "1rem", md: "0" }}
+              width={{ base: "65%", sm: "50%", md: "80%" }}
+              marginBottom={{ base: "1rem", md: "2rem" }}
               marginRight={{ base: "0", md: "8" }}
               backgroundImage={
                 "linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)"
@@ -197,82 +182,87 @@ export default function Home() {
                 backgroundImage:
                   "linear-gradient(43deg, #FFCC70 0%, #C850C0 46%, #4158D0 100%)",
               }}
-              onClick={mintNft}
+              onClick={() => mintNft()}
             >
               Mint NFT
             </Button>
-            <Button
-              width={{ base: "65%", sm: "50%", md: "30%" }}
-              background={"white"}
-              _hover={{
-                background: "#fbcce3",
-              }}
-              onClick={showBalance}
-            >
-              Show Balance
-            </Button>
-          </Box>
-          <Box
-            display={"flex"}
-            justifyContent={"center"}
-            fontWeight={"bold"}
-            marginTop={8}
-            flexDir={"column"}
-          >
-            <Box display={"flex"} flexDir={"column"}>
-              <Box>{balance ? `You have ${balance} BAYC NFTs.` : ""}</Box>
-              {balance ? (
-                <Box
-                  display={"flex"}
-                  flexDir={{ base: "column", sm: "row" }}
-                  position={"absolute"}
-                  top={"150%"}
-                  left={"50%"}
-                  transform={"translate(-50%,-50%)"}
-                >
-                  {NFTData.map((data) => {
-                    return (
-                      <Box key={data} marginRight={4} width={"7rem"}>
-                        <Image
-                          src={`https://gateway.pinata.cloud/ipfs/${data}#x-ipfs-companion-no-redirect`}
-                          width={100}
-                          height={100}
-                          alt="image"
-                        />
-                      </Box>
-                    );
-                  })}
-                </Box>
-              ) : (
-                ""
-              )}
-            </Box>
-            <Box>{isLoading ? <Spinner /> : ""}</Box>
             <Box>
-              {successMint ? "You have successfully minted an BAYC NFT!" : ""}
+              <Box display={"flex"} flexDirection={"row"}>
+                <Input
+                  background={"white"}
+                  placeholder="token id"
+                  value={tokenId}
+                  onChange={(event) => setTokenId(event.target.value)}
+                />
+                <Input
+                  background={"white"}
+                  placeholder="start price"
+                  value={startPrice}
+                  onChange={(event) => setStartPrice(event.target.value)}
+                />
+                <Input
+                  background={"white"}
+                  placeholder="end price"
+                  value={endPrice}
+                  onChange={(event) => setEndPrice(event.target.value)}
+                />
+                <Input
+                  background={"white"}
+                  placeholder="duration"
+                  value={duration}
+                  onChange={(event) => setDuration(event.target.value)}
+                />
+              </Box>
+              <Button
+                width={{ base: "65%", sm: "50%", md: "80%" }}
+                marginBottom={{ base: "1rem", md: "2rem" }}
+                marginTop={{ base: "0.5rem", md: "0.5rem" }}
+                marginRight={{ base: "0", md: "8" }}
+                backgroundImage={
+                  "linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)"
+                }
+                _hover={{
+                  backgroundImage:
+                    "linear-gradient(43deg, #FFCC70 0%, #C850C0 46%, #4158D0 100%)",
+                }}
+                onClick={startAuction}
+              >
+                Start Auction
+              </Button>
             </Box>
-            <Box
-              display={"flex"}
-              flexDir={"column"}
-              justifyContent={"center"}
-              alignItems={"center"}
-            >
-              <Text>
-                {failMint ? (
-                  <Alert status="error" variant="left-accent">
-                    <AlertIcon />
-                    <AlertTitle fontSize={19}>Minting NFT failed!</AlertTitle>
-                    <AlertDescription>
-                      You might not have enough ETH Or You might have exceeded
-                      the Max NFT Per Address Limit!
-                    </AlertDescription>
-                  </Alert>
-                ) : (
-                  ""
-                )}
-              </Text>
+            <Box>
+              <Box display={"flex"} flexDirection={"row"}>
+                <Input
+                  background={"white"}
+                  placeholder="token id"
+                  value={bidTokenId}
+                  onChange={(event) => setBidTokenId(event.target.value)}
+                />
+                <Input
+                  background={"white"}
+                  placeholder="bid amount (in ethers)"
+                  value={bidValue}
+                  onChange={(event) => setBidValue(event.target.value)}
+                />
+              </Box>
+              <Button
+                width={{ base: "65%", sm: "50%", md: "80%" }}
+                marginBottom={{ base: "1rem", md: "1rem" }}
+                marginRight={{ base: "0", md: "8" }}
+                backgroundImage={
+                  "linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%)"
+                }
+                _hover={{
+                  backgroundImage:
+                    "linear-gradient(43deg, #FFCC70 0%, #C850C0 46%, #4158D0 100%)",
+                }}
+                onClick={bidAuction}
+              >
+                Bid on Auction
+              </Button>
             </Box>
           </Box>
+          {isLoading ? <Spinner /> : ""}
         </Box>
       </Box>
     </>

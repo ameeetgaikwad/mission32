@@ -13,7 +13,7 @@
     "@chakra-ui/react": "^2.5.5",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
-    "@rainbow-me/rainbowkit": "^0.12.8",
+    "@rainbow-me/rainbowkit": "^0.12.18",
     "eslint": "8.38.0",
     "eslint-config-next": "13.3.0",
     "ethers": "^5.7.2",
@@ -22,6 +22,7 @@
     "next": "13.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "wagmi": "^0.12.10"
+    "viem": "^1.4.2",
+    "wagmi": "^0.12.19"
   }
 }
